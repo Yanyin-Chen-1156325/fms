@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Stocks{% endblock %}
+
+{% block content %}
+
+<h2>Stocks</h2>
+<table class="table table-striped table-bordered">
+    <thead>
+        
+    </thead>
+    <tbody>
+        {% for group in groups %}
+        <tr>
+            <th scope="col">Mob Name</th>
+            <th scope="col">Paddock Name</th>
+            <th scope="col">Number</th>
+            <th scope="col">Average Weight</th>
+        </tr>
+        <tr>
+            <td>{{ group['mob_name'] }}</td>
+            <td>{{ group['paddock_name'] }}</td>
+            <td>{{ group['mob_count'] }}</td>
+            <td>{{ group['avg_weight'] }}</td>
+        </tr>
+        <tr>
+            <td colspan="4">
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Stock ID</th>
+                            <th scope="col">Age</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stock in stocks %}
+                            {% if stock['mob_name'] == group['mob_name'] %}
+                            <tr>
+                                <td scope="row">{{ stock['stock_id'] }}</td>
+                                <td>{{ stock['stock_dob'] }}</td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

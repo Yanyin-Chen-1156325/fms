@@ -5,18 +5,25 @@
 {% block content %}
 
 <h2>Mobs</h2>
-
-    <table>   
-        <tr>
-            <th>Mob ID</th>
-            <th>Mob Name</th>
-        </tr>
+    <table class="table table-striped">   
+        <thead>
+            <tr>
+            <th scope="col">Mob Name</th>
+            <th scope="col">Paddock ID</th>
+            <th scope="col">Paddock Name</th>
+            <th scope="col">Paddock Area</th>
+            </tr>
+        </thead>
+        <tbody>
         {% for mob in mobs %}  
             <tr>
-                <td>{{mob[0]}}</td>  
-                <td>{{mob[1]}}</td>  
+                <td scope="row">{{mob['mob_name']}}</td>
+                <td>{{mob['paddock_id']}}</td>
+                <td>{{mob['paddock_name']}}</td>
+                <td>{{mob['paddock_area']}}</td>
             </tr>
         {% endfor %}    
+        </tbody>
     </table>
 
 {% endblock %}
