@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Mobs{% endblock %}
+
+{% block content %}
+
+<h2 class="display-4 text-primary text-center border-bottom pb-2 mb-4">Moving Mobs</h2>
+<div class="d-flex justify-content-center align-items-top">
+<form class="row g-3 needs-validation" action="/moving" method="POST" novalidate style="width: 400px;">
+    <div class="col-md-12">
+      <label for="mobName" class="form-label">Mob Name</label>
+      <select class="form-select" id="mobSelect" name="mob_id" required>
+        <option selected disabled value="">Choose...</option>
+        {% for mob in mobs %}
+        <option value="{{ mob['mob_id'] }}">{{mob['mob_name']}}</option>
+        {% endfor %}
+      </select>
+      <div class="invalid-feedback">
+        Please select a Mob.
+      </div>
+    </div>
+    <div>
+        <p class="text-center">Moving to</p>
+    </div>
+    <div class="col-md-12">
+      <label for="paddockName" class="form-label">Paddock Name</label>
+      <select class="form-select" id="paddockSelect" name="paddock_id" required>
+        <option selected disabled value="">Choose...</option>
+        {% for paddock in paddock_no_mob %}
+        <option value="{{ paddock['paddock_id'] }}">{{paddock['paddock_name']}}</option>
+        {% endfor %}
+      </select>
+      <div class="invalid-feedback">
+        Please select a Paddock.
+      </div>
+    </div>
+    <div class="col-12 text-center">
+      <button class="btn btn-primary" type="submit">Submit form</button>
+    </div>
+</form>
+</div>
+{% endblock %}

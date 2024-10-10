@@ -4,8 +4,67 @@
 
 {% block content %}
 
-<p>Paddocks</p>
+<h2 class="display-4 text-primary border-bottom pb-2 mb-4">Paddocks</h2>
 <!-- New line (which you are free to edit or delete): -->
-<p>{% if curr_date %}Today is: {{curr_date.strftime("%d %B %Y")}}{% endif %}</p>
-
+<table class="table table-bordered table-hover">   
+    <thead>
+        <tr>
+        <th scope="col">Paddock Name</th>
+        <th scope="col">ID</th>
+        <th scope="col">Area</th>
+        <th scope="col">DM per Ha</th>
+        <th scope="col">Total DM</th>
+        <th scope="col">Mob Name</th>
+        <th scope="col">Stock Count</th>
+        <th scope="col">Edit</th>
+        <th scope="col">Delete</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for paddock in paddocks %}  
+        <tr {% if paddock['paddock_dm'] < 1500 %}  class="table-danger"
+            {% elif paddock['paddock_dm'] < 1800 %} class="table-warning"
+            {% endif %}>
+            <td>{{paddock['paddock_name']}}</td>
+            <td>{{paddock['paddock_id']}}</td>
+            <td>{{paddock['paddock_area']}}</td> 
+            <td>{{paddock['paddock_dm']}}</td>     
+            <td>{{paddock['paddock_total_dm']}}</td>
+            <td>
+            {% if paddock['mob_name'] is none %}
+                <em>None</em>
+            {% else %}
+                {{ paddock['mob_name'] }}
+            {% endif %}
+            </td>
+            <td>{{paddock['mob_count']}}</td>
+            <td>
+                <form action="/paddocks_edit" method="POST" style="display: inline;">
+                    <input type="hidden" name="paddock_id" value="{{ paddock['paddock_id'] }}">
+                    <input type="hidden" name="paddock_name" value="{{ paddock['paddock_name'] }}">
+                    <input type="hidden" name="paddock_area" value="{{ paddock['paddock_area'] }}">
+                    <input type="hidden" name="paddock_dm" value="{{ paddock['paddock_dm'] }}">
+                    <button type="submit" class="btn btn-primary">Edit</button>
+                </form>
+            </td>
+            <td>
+                {% if paddock['mob_name'] is none %}
+                <form action="/delete_paddock" method="POST" style="display: inline;">
+                    <input type="hidden" name="paddock_id" value="{{ paddock['paddock_id'] }}">
+                    <button type="submit" class="btn btn-primary">Delete</button>
+                </form>
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}    
+    </tbody>
+</table>
+<div style="display: flex; justify-content: space-between; width: 100%;">
+    <form action="/paddocks_add" method="POST" style="display: inline;">
+        <button type="submit" class="btn btn-primary">Add Paddock</button>
+    </form>
+    <form action="/move_to_next_day" method="POST" style="display: inline;">
+        <button type="submit" class="btn btn-primary">Move to NEXT day</button>
+    </form>
+</div>
 {% endblock %}

@@ -4,7 +4,7 @@
 
 {% block content %}
 
-<h2>Mobs</h2>
+<h2 class="display-4 text-primary border-bottom pb-2 mb-4">Mobs</h2>
     <table class="table table-striped">   
         <thead>
             <tr>
@@ -12,15 +12,18 @@
             <th scope="col">Paddock ID</th>
             <th scope="col">Paddock Name</th>
             <th scope="col">Paddock Area</th>
+            <th scope="col">Stock Count</th>
             </tr>
         </thead>
         <tbody>
+        {% set classes = ['table-success', 'table-danger', 'table-warning', 'table-info', 'table-light'] %}
         {% for mob in mobs %}  
-            <tr>
-                <td scope="row">{{mob['mob_name']}}</td>
+            <tr class="{{ classes[loop.index0 % classes|length] }}">
+                <td>{{mob['mob_name']}}</td>
                 <td>{{mob['paddock_id']}}</td>
                 <td>{{mob['paddock_name']}}</td>
                 <td>{{mob['paddock_area']}}</td>
+                <td>{{mob['mob_count']}}</td>
             </tr>
         {% endfor %}    
         </tbody>
