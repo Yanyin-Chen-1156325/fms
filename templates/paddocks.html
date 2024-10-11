@@ -37,7 +37,7 @@
                 {{ paddock['mob_name'] }}
             {% endif %}
             </td>
-            <td>{{paddock['mob_count']}}</td>
+            <td>{{paddock['stock_count']}}</td>
             <td>
                 <a href="{{ url_for('edit_paddock', paddock_id=paddock['paddock_id']) }}" class="btn btn-primary btn-sm">Edit</a>
             </td>
@@ -54,7 +54,9 @@
     </tbody>
 </table>
 <div style="display: flex; justify-content: space-between; width: 100%;">
-    <a href="{{ url_for('paddocks_add') }}" class="btn btn-primary">Add Paddock</a>
+    <form action="/paddocks_add" method="POST" style="display: inline;">
+        <button type="submit" class="btn btn-primary">Add Paddock</button>
+    </form>
     <form action="/move_to_next_day" method="POST" style="display: inline;">
         <button type="submit" class="btn btn-primary">Move to NEXT day</button>
     </form>

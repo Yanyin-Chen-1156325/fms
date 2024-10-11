@@ -3,13 +3,23 @@
   
 ## Design decisions
 1.  SQL:  
-   The data in the select parts are very similar. Therefore, I mainly use two sets of SQL queries with Group By clauses to present the data. Each function then retrieves the specific data it needs.
+   The data retrieved by SQL queries for each function are very similar, so I mainly use one SQL query to generate data for mobs, paddocks, and stock statistics. This allows different routes to use the data as needed. I believe this approach makes the code cleaner. Additionally, I use the same names for the columns created by different SQL queries. This way, the same names can be used across different pages, which helps avoid confusion.
+   Currently, the amount of data is small, so I'm using join SQL. However, if the data grows to a point where it affects query performance, this method won't be suitable. In that case, we would need to change the approach to query each table separately and then process the related logic in the program.
+
   
 2.  Add and edit functions:   
    They require the same data. The only difference is that the edit function will pre-fill the data, while the add function will not. Therefore, we use the same template, paddock_form.html, but use different routes to pass different parameters. This helps identify with the add and edit functions.
    We use the same layout for both functions to reduce code duplication and improve efficiency.
-  
 
+  
+3. Methods used for add, modify, and delete buttons:
+    The POST method is used for both adding and deleting. Adding doesn't require any parameters, so either POST or GET could be used. Deleting needs to pass parameters, so POST is used to prevent users from potentially manipulating data. The GET method is used for Editing. It retrieves Paddock's id based on URL parameters and returns it to the page without changing the database, so GET can be used safely.
+
+  
+4. Moving mobs function:
+   Only paddocks without mobs are passed to the frontend. This approach helps prevent errors when updating the database.
+  
+  
 ## Image sources
 1. farm2.jpg: [unsplash](https://unsplash.com/photos/herd-of-dairy-cattles-on-field-AxoNnnH1Y98)
      

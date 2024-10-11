@@ -10,7 +10,7 @@
         
     </thead>
     <tbody>
-        {% for group in groups %}
+        {% for mob in mobs %}
         <tr>
             <th scope="col">Mob Name</th>
             <th scope="col">Paddock Name</th>
@@ -18,10 +18,10 @@
             <th scope="col">Average Weight</th>
         </tr>
         <tr>
-            <td>{{ group['mob_name'] }}</td>
-            <td>{{ group['paddock_name'] }}</td>
-            <td>{{ group['mob_count'] }}</td>
-            <td>{{ group['avg_weight'] }}</td>
+            <td>{{ mob['mob_name'] }}</td>
+            <td>{{ mob['paddock_name'] }}</td>
+            <td>{{ mob['stock_count'] }}</td>
+            <td>{{ mob['avg_weight'] }}</td>
         </tr>
         <tr>
             <td colspan="4">
@@ -36,7 +36,7 @@
                     </thead>
                     <tbody>
                         {% for stock in stocks %}
-                            {% if stock['mob_name'] == group['mob_name'] %}
+                            {% if stock['mob_id'] == mob['mob_id'] %}
                             <tr>
                                 <td>{{ stock['stock_id'] }}</td>
                                 <td>{{ stock['stock_age'] }}</td>

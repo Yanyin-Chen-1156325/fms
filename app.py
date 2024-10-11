@@ -91,36 +91,20 @@ def move_current_date():
     cursor.execute(qstr, qargs)
     return
 
-def mob_paddock_stock():
+def paddock_mob_stock():
     """! Get the mob details with the stock in each mob and paddock details.
     @param: None
     @return: (dict) mob details with the stock in each mob and paddock details
     """
-    cursor = getCursor()
-    qstr = """select mobs.name as mob_name, mobs.id as mob_id, paddocks.name as paddock_name, paddocks.id as paddock_id, paddocks.area as paddock_area, paddocks.total_dm as paddock_total_dm, count(stock.id) as mob_count, round(avg(stock.weight), 2) as avg_weight
-                from mobs
-                inner join stock on mobs.id = stock.mob_id
-                inner join paddocks on mobs.paddock_id = paddocks.id
-                group by mobs.name, paddocks.name, paddocks.id, paddocks.area, paddocks.total_dm
-                order by mobs.name;
-            """ 
-    cursor.execute(qstr) 
-    table = cursor.fetchall()
-    return table
-
-def mob_paddock():
-    """! Get the mob details with the paddock details, and the number of stock in each mob.
-    @param: None
-    @return: (dict) mob details with the paddock details, and the number of stock in each mob.
-    """
     cursor = getCursor()  
     qstr = """SELECT paddocks.id as paddock_id, paddocks.name as paddock_name, paddocks.area as paddock_area, paddocks.dm_per_ha as paddock_dm, paddocks.total_dm as paddock_total_dm, 
-                mobs.name as mob_name, COUNT(stock.id) as mob_count
+                mobs.id as mob_id, mobs.name as mob_name, 
+                COUNT(stock.id) as stock_count, round(avg(stock.weight), 2) as avg_weight
                 FROM paddocks
                 LEFT JOIN mobs ON paddocks.id = mobs.paddock_id
                 LEFT JOIN stock ON mobs.id = stock.mob_id
                 GROUP BY paddocks.id, paddocks.name, paddocks.area, paddocks.dm_per_ha, paddocks.total_dm, mobs.name
-                ORDER BY paddocks.name;
+                ORDER BY mobs.name;
             """
     cursor.execute(qstr) 
     table = cursor.fetchall() 
@@ -133,7 +117,7 @@ def update_paddocks(paddocks):
     """
     cursor = getCursor() 
     for paddock in paddocks:
-        new_totaldm_dmha = pasture_levels(paddock["paddock_area"], paddock["mob_count"], paddock["paddock_total_dm"], pasture_growth_rate, stock_consumption_rate)
+        new_totaldm_dmha = pasture_levels(paddock["paddock_area"], paddock["stock_count"], paddock["paddock_total_dm"], pasture_growth_rate, stock_consumption_rate)
         qstr = "update paddocks set dm_per_ha = %s, total_dm = %s where id = %s;"
         qargs = (new_totaldm_dmha["dm_per_ha"], new_totaldm_dmha["total_dm"], paddock["paddock_id"])
         cursor.execute(qstr,qargs)
@@ -172,7 +156,8 @@ def mobs():
     @param: None
     @return: (dict) mob details, (datetime) current date
     """       
-    mobs = mob_paddock_stock()    
+    mobs = paddock_mob_stock() 
+    mobs = [mob for mob in mobs if mob["mob_name"] is not None]   
     curr_date = get_date()  
     return render_template("mobs.html", mobs=mobs, curr_date = curr_date)  
 
@@ -184,18 +169,18 @@ def stocks():
     """
     curr_date = get_date()
     cursor = getCursor()        
-    qstr = """select mobs.name as mob_name, stock.id as stock_id, stock.dob as stock_dob, stock.weight as stock_weight
-                from mobs
-                inner join stock on mobs.id = stock.mob_id
-                order by 1,2;
+    qstr = """select stock.id as stock_id, stock.mob_id as mob_id, stock.dob as stock_dob, stock.weight as stock_weight
+                from stock
+                order by stock.id;
             """ 
     cursor.execute(qstr)        
     stocks = cursor.fetchall()     
-    for dict in stocks:
-        dict['stock_age'] = calculate_age(curr_date, dict['stock_dob'])
+    for item in stocks:
+        item['stock_age'] = calculate_age(curr_date, item['stock_dob'])
      
-    groups = mob_paddock_stock() 
-    return render_template("stocks.html", stocks=stocks, groups=groups, curr_date = curr_date)
+    mobs = paddock_mob_stock() 
+    mobs = [mob for mob in mobs if mob["mob_name"] is not None]
+    return render_template("stocks.html", stocks=stocks, mobs=mobs, curr_date = curr_date)
 
 @app.route("/paddocks")
 def paddocks():
@@ -203,7 +188,8 @@ def paddocks():
     @param: None
     @return: (dict) paddock details, (datetime) current date
     """
-    paddocks = mob_paddock() 
+    paddocks = paddock_mob_stock() 
+    paddocks = sorted(paddocks, key=lambda x: x['paddock_name'])
     curr_date = get_date()
     return render_template("paddocks.html", paddocks=paddocks, curr_date = curr_date)  
 
@@ -213,9 +199,10 @@ def move_mobs():
     @param: None
     @return: (dict) mobs, (dict) paddock_no_mob, (datetime) current date
     """
-    mobs = mob_paddock_stock()
-    paddocks = mob_paddock()
-    paddock_no_mob = [paddock for paddock in paddocks if paddock["mob_name"] is None]
+    all_data = paddock_mob_stock()
+    mobs = [mob for mob in all_data if mob["mob_name"] is not None]
+    paddock_no_mob = [paddock for paddock in all_data if paddock["mob_name"] is None]
+    paddock_no_mob = sorted(paddock_no_mob, key=lambda x: x['paddock_name'])
     curr_date = get_date()
     return render_template("move_mobs.html", mobs= mobs, paddock_no_mob = paddock_no_mob, curr_date = curr_date)
 
@@ -252,19 +239,14 @@ def update_paddock():
     @param: None
     @return: (redirect) to the paddocks page
     """
-    paddock_id = request.form['paddock_id']
-    paddock_name = request.form['paddock_name']
-    area = request.form['paddock_area']
-    dm = request.form['paddock_dm']
-    total_dm = round(float(area) * float(dm), 2)
-    
     cursor = getCursor() 
+    formvals = request.form
     qstr = "update paddocks set name = %s, area = %s, dm_per_ha = %s, total_dm = %s where id = %s;"
-    qargs = (paddock_name, area, dm, total_dm, paddock_id)
+    qargs = (formvals['paddock_name'], formvals['paddock_area'], formvals['paddock_dm'], round(float(formvals['paddock_area']) * float(formvals['paddock_dm']), 2), formvals['paddock_id'])
     cursor.execute(qstr,qargs)
     return redirect(url_for('paddocks'))
 
-@app.route('/paddocks_add', methods=['GET'])
+@app.route('/paddocks_add', methods=['POST'])
 def paddocks_add():
     """! Display the form for adding a new paddock.
     @param: None
@@ -307,7 +289,7 @@ def move_to_next_day():
     @return: (redirect) to the paddocks page
     """
     move_current_date()
-    paddocks = mob_paddock_stock()
+    paddocks = paddock_mob_stock()
     update_paddocks(paddocks)
     return redirect(url_for('paddocks'))
 
