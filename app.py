@@ -213,7 +213,6 @@ def move_mobs():
     @param: None
     @return: (dict) mobs, (dict) paddock_no_mob, (datetime) current date
     """
-    cursor = getCursor() 
     mobs = mob_paddock_stock()
     paddocks = mob_paddock()
     paddock_no_mob = [paddock for paddock in paddocks if paddock["mob_name"] is None]
@@ -233,14 +232,19 @@ def moving():
     cursor.execute(qstr,qargs)
     return redirect(url_for('paddocks'))
 
-@app.route('/paddocks_edit', methods=['POST'])
-def edit_paddock():
-    """! Edit the paddock details. Pass the paddock details to the edit page.
+@app.route('/paddocks_edit/<int:paddock_id>', methods=['GET'])
+def edit_paddock(paddock_id):
+    """! Display the form for editing an existing paddock.
     @param: None
-    @return: (dict) paddock details
+    @return: render the paddock form template for editing
     """
-    paddock = request.form
-    return render_template('paddocks_edit.html', paddock=paddock)
+    cursor = getCursor()
+    qstr = """SELECT paddocks.id as paddock_id, paddocks.name as paddock_name, paddocks.area as paddock_area, paddocks.dm_per_ha as paddock_dm
+                FROM paddocks WHERE id = %s
+            """
+    cursor.execute(qstr, (paddock_id,))
+    paddock = cursor.fetchone()
+    return render_template('paddocks_form.html', is_add=False, paddock=paddock)
 
 @app.route('/update_paddock', methods=['POST'])
 def update_paddock():
@@ -260,13 +264,13 @@ def update_paddock():
     cursor.execute(qstr,qargs)
     return redirect(url_for('paddocks'))
 
-@app.route('/paddocks_add', methods=['POST'])
+@app.route('/paddocks_add', methods=['GET'])
 def paddocks_add():
-    """! Redirect to the paddocks_add page for adding a new paddock.
+    """! Display the form for adding a new paddock.
     @param: None
     @return: (redirect) to the paddocks page
     """
-    return render_template('paddocks_add.html')
+    return render_template('paddocks_form.html', is_add=True)
 
 @app.route('/add_paddock', methods=['POST'])
 def add_paddock():
