@@ -21,9 +21,12 @@ stock_consumption_rate = 14 #kg DM/animal/day
 db_connection = None
  
 def getCursor():
-    """Gets a new dictionary cursor for the database.
+    """! Gets a new dictionary cursor for the database.
     If necessary, a new database connection is created here and used for all
-    subsequent to getCursor()."""
+    subsequent to getCursor().
+    @param: None
+    @return: (cursor) a new dictionary cursor
+    """
     global db_connection
  
     if db_connection is None or not db_connection.is_connected():
@@ -37,6 +40,10 @@ def getCursor():
 
 ####### New function - reads the date from the new database table
 def get_date():
+    """! Get the current date from the database.
+    @param: None
+    @return: (datetime) current date
+    """
     cursor = getCursor()        
     qstr = "select curr_date from curr_date;"  
     cursor.execute(qstr)        
@@ -44,8 +51,9 @@ def get_date():
     return curr_date
 
 def calculate_age(current_date, birth_date):
-    """! Calculate the age of the animal based on the birth date.
-    @param birth_date (datetime): birth date
+    """! Calculate the age based on the birth date.
+    @param current_date (datetime): current date which is from the database
+    @param birth_date (datetime): birth date of the animal
     @return: (int) age
     """
     birth_date_t = birth_date.replace(year=current_date.year)
@@ -57,9 +65,13 @@ def calculate_age(current_date, birth_date):
     return age
 
 def pasture_levels(area, stock_num, total_dm, pasture_growth_rate, stock_consumption_rate):
-    """
-    Calculate total pasture (in kg DM) for a paddock based on area, growth rate and stock number.
-    Arguments: area (ha), stock number, total DM (kg), pasture growth rate (kg DM/ha/day), stock_consumption rate (kg DM/animal/day) 
+    """! Calculate total pasture (in kg DM) for a paddock based on area, growth rate and stock number.
+    @param area (float): paddock area in hectares
+    @param stock_num (int): number of animals in the paddock
+    @param total_dm (float): total dry matter (in kg) in the paddock
+    @param pasture_growth_rate (float): growth rate of pasture in kg DM/ha/day
+    @param stock_consumption_rate (float): consumption rate of pasture by an animal in kg DM/day
+    @return: (dict) total_dm, dm_per_ha
     """
     growth = area * pasture_growth_rate
     consumption = stock_num * stock_consumption_rate
@@ -68,6 +80,10 @@ def pasture_levels(area, stock_num, total_dm, pasture_growth_rate, stock_consump
     return {'total_dm':total_dm, 'dm_per_ha':dm_per_ha}
 
 def move_current_date():
+    """! Move the current date to the next day. Store the new date in the database.
+    @param: None
+    @return: None
+    """
     next_date = get_date() + timedelta(days=1)
     cursor = getCursor()
     qstr = "update curr_date set curr_date = %s;"
@@ -76,8 +92,12 @@ def move_current_date():
     return
 
 def mob_paddock_stock():
+    """! Get the mob details with the stock in each mob and paddock details.
+    @param: None
+    @return: (dict) mob details with the stock in each mob and paddock details
+    """
     cursor = getCursor()
-    qstr = """select mobs.name as mob_name, paddocks.name as paddock_name, paddocks.id as paddock_id, paddocks.area as paddock_area, paddocks.total_dm as paddock_total_dm, count(stock.id) as mob_count, round(avg(stock.weight), 2) as avg_weight
+    qstr = """select mobs.name as mob_name, mobs.id as mob_id, paddocks.name as paddock_name, paddocks.id as paddock_id, paddocks.area as paddock_area, paddocks.total_dm as paddock_total_dm, count(stock.id) as mob_count, round(avg(stock.weight), 2) as avg_weight
                 from mobs
                 inner join stock on mobs.id = stock.mob_id
                 inner join paddocks on mobs.paddock_id = paddocks.id
@@ -89,6 +109,10 @@ def mob_paddock_stock():
     return table
 
 def mob_paddock():
+    """! Get the mob details with the paddock details, and the number of stock in each mob.
+    @param: None
+    @return: (dict) mob details with the paddock details, and the number of stock in each mob.
+    """
     cursor = getCursor()  
     qstr = """SELECT paddocks.id as paddock_id, paddocks.name as paddock_name, paddocks.area as paddock_area, paddocks.dm_per_ha as paddock_dm, paddocks.total_dm as paddock_total_dm, 
                 mobs.name as mob_name, COUNT(stock.id) as mob_count
@@ -103,6 +127,10 @@ def mob_paddock():
     return table
 
 def update_paddocks(paddocks):
+    """! Update the paddock details based on the pasture levels into the database.
+    @param paddocks (dict): paddock details and stock count in each mob
+    @return: None
+    """
     cursor = getCursor() 
     for paddock in paddocks:
         new_totaldm_dmha = pasture_levels(paddock["paddock_area"], paddock["mob_count"], paddock["paddock_total_dm"], pasture_growth_rate, stock_consumption_rate)
@@ -125,7 +153,10 @@ def home():
 ##  NOTE: This requires fms-reset.sql file to be in the same folder as app.py
 @app.route("/reset")
 def reset():
-    """Reset data to original state."""
+    """! Reset data to original state.
+    @param: None
+    @return: (redirect) to the paddocks page
+    """
     THIS_FOLDER = Path(__file__).parent.resolve()
     with open(THIS_FOLDER / 'fms-reset.sql', 'r') as f:
         mqstr = f.read()
@@ -137,13 +168,20 @@ def reset():
 
 @app.route("/mobs")
 def mobs():
-    """List the mob details (excludes the stock in each mob)."""       
+    """! List the mob details (excludes the stock in each mob).
+    @param: None
+    @return: (dict) mob details, (datetime) current date
+    """       
     mobs = mob_paddock_stock()    
     curr_date = get_date()  
-    return render_template("mobs.html", mobs=mobs, curr_date = get_date())  
+    return render_template("mobs.html", mobs=mobs, curr_date = curr_date)  
 
 @app.route("/stocks")
 def stocks():
+    """! List the mobs, and the stock details which includes the stock in each mob.
+    @param: None
+    @return: (dict) stock details, (dict) mob details with the stock in each mob, (datetime) current date
+    """
     curr_date = get_date()
     cursor = getCursor()        
     qstr = """select mobs.name as mob_name, stock.id as stock_id, stock.dob as stock_dob, stock.weight as stock_weight
@@ -161,13 +199,20 @@ def stocks():
 
 @app.route("/paddocks")
 def paddocks():
-    """List paddock details."""
+    """! List paddock details.
+    @param: None
+    @return: (dict) paddock details, (datetime) current date
+    """
     paddocks = mob_paddock() 
     curr_date = get_date()
     return render_template("paddocks.html", paddocks=paddocks, curr_date = curr_date)  
 
 @app.route("/move_mobs")
 def move_mobs():
+    """! List the mobs and paddocks which do not have any mobs.
+    @param: None
+    @return: (dict) mobs, (dict) paddock_no_mob, (datetime) current date
+    """
     cursor = getCursor() 
     mobs = mob_paddock_stock()
     paddocks = mob_paddock()
@@ -177,6 +222,10 @@ def move_mobs():
 
 @app.route("/moving", methods=['POST'])
 def moving():
+    """! Move the mob to a new paddock.
+    @param: None
+    @return: (redirect) to the paddocks page
+    """
     cursor = getCursor() 
     formvals = request.form
     qstr = "update mobs set paddock_id = %s where id = %s;"
@@ -186,11 +235,19 @@ def moving():
 
 @app.route('/paddocks_edit', methods=['POST'])
 def edit_paddock():
+    """! Edit the paddock details. Pass the paddock details to the edit page.
+    @param: None
+    @return: (dict) paddock details
+    """
     paddock = request.form
     return render_template('paddocks_edit.html', paddock=paddock)
 
 @app.route('/update_paddock', methods=['POST'])
 def update_paddock():
+    """! Update the paddock details.
+    @param: None
+    @return: (redirect) to the paddocks page
+    """
     paddock_id = request.form['paddock_id']
     paddock_name = request.form['paddock_name']
     area = request.form['paddock_area']
@@ -205,10 +262,18 @@ def update_paddock():
 
 @app.route('/paddocks_add', methods=['POST'])
 def paddocks_add():
+    """! Redirect to the paddocks_add page for adding a new paddock.
+    @param: None
+    @return: (redirect) to the paddocks page
+    """
     return render_template('paddocks_add.html')
 
 @app.route('/add_paddock', methods=['POST'])
 def add_paddock():
+    """! Add a new paddock.
+    @param: None
+    @return: (redirect) to the paddocks page
+    """
     cursor = getCursor() 
     formvals = request.form
     qstr = """Insert into paddocks(name, area, dm_per_ha, total_dm) 
@@ -220,6 +285,10 @@ def add_paddock():
 
 @app.route('/delete_paddock', methods=['POST'])
 def delete_paddock():
+    """! Delete a paddock.
+    @param: None
+    @return: (redirect) to the paddocks page
+    """
     cursor = getCursor() 
     formvals = request.form
     qstr = """Delete from paddocks where id = %s;"""
@@ -229,8 +298,11 @@ def delete_paddock():
 
 @app.route('/move_to_next_day', methods=['POST'])
 def move_to_next_day():
+    """! Move to the next day. Calculate the pasture levels and update the paddock details. Calculate the age of the stock.
+    @param: None
+    @return: (redirect) to the paddocks page
+    """
     move_current_date()
-    cursor = getCursor()
     paddocks = mob_paddock_stock()
     update_paddocks(paddocks)
     return redirect(url_for('paddocks'))
