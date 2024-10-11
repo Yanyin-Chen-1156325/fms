@@ -12,11 +12,11 @@
    We use the same layout for both functions to reduce code duplication and improve efficiency.
 
   
-3. Methods used for add, modify, and delete buttons:
+3. Methods used for add, modify, and delete buttons:  
     The POST method is used for both adding and deleting. Adding doesn't require any parameters, so either POST or GET could be used. Deleting needs to pass parameters, so POST is used to prevent users from potentially manipulating data. The GET method is used for Editing. It retrieves Paddock's id based on URL parameters and returns it to the page without changing the database, so GET can be used safely.
 
   
-4. Moving mobs function:
+4. Moving mobs function:  
    Only paddocks without mobs are passed to the frontend. This approach helps prevent errors when updating the database.
   
   
