@@ -3,14 +3,13 @@
 {% block title %}Paddocks{% endblock %}
 
 {% block content %}
-
-<h2 class="display-4 text-primary border-bottom pb-2 mb-4">Paddocks</h2>
+<div class="container table-responsive-md">
+<h2 class="display-4 text-primary border-bottom pb-2 mb-4 mt-4">Paddocks</h2>
 <!-- New line (which you are free to edit or delete): -->
-<table class="table table-bordered table-hover">   
+<table class="table table-hover">   
     <thead>
         <tr>
         <th scope="col">Paddock Name</th>
-        <th scope="col">ID</th>
         <th scope="col">Area</th>
         <th scope="col">DM/ha</th>
         <th scope="col">Total DM</th>
@@ -26,17 +25,10 @@
             {% elif paddock['paddock_dm'] < 1800 %} class="table-warning"
             {% endif %}>
             <td>{{paddock['paddock_name']}}</td>
-            <td>{{paddock['paddock_id']}}</td>
             <td>{{paddock['paddock_area']}}</td> 
             <td>{{paddock['paddock_dm']}}</td>     
             <td>{{paddock['paddock_total_dm']}}</td>
-            <td>
-            {% if paddock['mob_name'] is none %}
-                <em>None</em>
-            {% else %}
-                {{ paddock['mob_name'] }}
-            {% endif %}
-            </td>
+            <td>{{paddock['mob_name'] or ''}}</td>
             <td>{{paddock['stock_count']}}</td>
             <td>
                 <a href="{{ url_for('edit_paddock', paddock_id=paddock['paddock_id']) }}" class="btn btn-primary btn-sm">Edit</a>
@@ -60,5 +52,6 @@
     <form action="/move_to_next_day" method="POST" style="display: inline;">
         <button type="submit" class="btn btn-primary">Move to NEXT day</button>
     </form>
+</div>
 </div>
 {% endblock %}

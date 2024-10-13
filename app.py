@@ -131,11 +131,11 @@ def home():
     # Replaces these lines:
     # if 'curr_date' not in session:
     #     session.update({'curr_date': start_date})
-    return render_template("home.html", curr_date=curr_date)
+    return render_template("home.html", curr_date=curr_date, is_page='home')
 
 ####### New function to reset the simulation back to the beginning - replaces reset_date() and clear_date()
 ##  NOTE: This requires fms-reset.sql file to be in the same folder as app.py
-@app.route("/reset")
+@app.route("/reset", methods=['POST'])
 def reset():
     """! Reset data to original state.
     @param: None
@@ -159,7 +159,7 @@ def mobs():
     mobs = paddock_mob_stock() 
     mobs = [mob for mob in mobs if mob["mob_name"] is not None]   
     curr_date = get_date()  
-    return render_template("mobs.html", mobs=mobs, curr_date = curr_date)  
+    return render_template("mobs.html", mobs=mobs, curr_date = curr_date, is_page='mobs')  
 
 @app.route("/stocks")
 def stocks():
@@ -180,7 +180,7 @@ def stocks():
      
     mobs = paddock_mob_stock() 
     mobs = [mob for mob in mobs if mob["mob_name"] is not None]
-    return render_template("stocks.html", stocks=stocks, mobs=mobs, curr_date = curr_date)
+    return render_template("stocks.html", stocks=stocks, mobs=mobs, curr_date = curr_date, is_page='stocks')
 
 @app.route("/paddocks")
 def paddocks():
@@ -191,7 +191,7 @@ def paddocks():
     paddocks = paddock_mob_stock() 
     paddocks = sorted(paddocks, key=lambda x: x['paddock_name'])
     curr_date = get_date()
-    return render_template("paddocks.html", paddocks=paddocks, curr_date = curr_date)  
+    return render_template("paddocks.html", paddocks=paddocks, curr_date = curr_date, is_page='paddocks')  
 
 @app.route("/move_mobs")
 def move_mobs():
@@ -204,7 +204,7 @@ def move_mobs():
     paddock_no_mob = [paddock for paddock in all_data if paddock["mob_name"] is None]
     paddock_no_mob = sorted(paddock_no_mob, key=lambda x: x['paddock_name'])
     curr_date = get_date()
-    return render_template("move_mobs.html", mobs= mobs, paddock_no_mob = paddock_no_mob, curr_date = curr_date)
+    return render_template("move_mobs.html", mobs= mobs, paddock_no_mob = paddock_no_mob, curr_date = curr_date, is_page='move_mobs')
 
 @app.route("/moving", methods=['POST'])
 def moving():

@@ -21,26 +21,23 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            {% set navigation_items = [
+              ('home', 'Home'),
+              ('mobs', 'Mobs'),
+              ('stocks', 'Stocks'),
+              ('paddocks', 'Paddocks'),
+              ('move_mobs', 'Move')
+            ] %}
+            {% for route, label in navigation_items %}
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="{{url_for('home')}}">Home</a>
+              <a class="nav-link {{ 'active' if is_page == route else '' }}" aria-current="page" href="{{ url_for(route) }}">{{ label }}</a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{{url_for('mobs')}}">Mobs</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{{url_for('stocks')}}">Stocks</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{{url_for('paddocks')}}">Paddocks</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{{url_for('move_mobs')}}">Move</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{{url_for('reset')}}">Reset</a>
-            </li>
+            {% endfor %}
           </ul>
           <a class="navbar-brand"> {% if curr_date %}Today is: {{curr_date.strftime("%d %B %Y")}}{% endif %}</a>
+          <form action="/reset" method="POST" style="display: inline;">
+            <button type="submit" class="btn btn-danger">Reset</button>
+          </form>
         </div>
       </div>
       <!-- New line -->
