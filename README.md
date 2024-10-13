@@ -15,7 +15,7 @@
 3. Methods used for add, modify, and delete buttons:  
     The POST method is used for both adding and deleting. Adding doesn't require any parameters, so either POST or GET could be used. Deleting needs to pass parameters, so POST is used to prevent users from potentially manipulating data. The GET method is used for Editing. It retrieves Paddock's id based on URL parameters and returns it to the page without changing the database, so GET can be used safely.
   
-4. Input of area and dry matter per hectare:
+4. Input of area and dry matter per hectare:  
    Both fields are restricted to two decimal places. These values don’t need to be very precise, so limiting them to two decimal places is better for the layout.   
    The area must be greater than 0, as an area cannot be 0.   
    However, dry matter per hectare can be 0.
@@ -25,7 +25,7 @@
    Only paddocks without mobs are passed to the frontend. This approach helps prevent errors when updating the database.
   
   
-6. Navbar function: 
+6. Navbar function:  
    For user-friendly, highlight the item of the page which the user is clicking.
    
   
