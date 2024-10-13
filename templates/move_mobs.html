@@ -13,7 +13,7 @@
       <select class="form-select" id="mobSelect" name="mob_id" required>
         <option selected disabled value="">Choose...</option>
         {% for mob in mobs %}
-        <option value="{{ mob['mob_id'] }}">{{mob['mob_name']}}</option>
+        <option value="{{ mob['mob_id'] }}">{{mob['mob_name']}} (in {{mob['paddock_name']}})</option>
         {% endfor %}
       </select>
       <div class="invalid-feedback">
