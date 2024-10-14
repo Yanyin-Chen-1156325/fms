@@ -11,7 +11,7 @@
   <body>
     <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top" data-bs-theme="dark">
       <div class="container-fluid">
-        <a class="navbar-brand" href="{{url_for('home')}}">
+        <a class="navbar-brand fs-4" href="{{url_for('home')}}">
           <i class="bi bi-house"></i>
           Farm Management Simulator
         </a>
@@ -30,11 +30,15 @@
             ] %}
             {% for route, label in navigation_items %}
             <li class="nav-item">
-              <a class="nav-link {{ 'active' if is_page == route else '' }}" aria-current="page" href="{{ url_for(route) }}">{{ label }}</a>
+              <a class="nav-link fs-5 {{ 'active' if is_page == route else '' }}" aria-current="page" href="{{ url_for(route) }}">{{ label }}</a>
             </li>
             {% endfor %}
           </ul>
-          <a class="navbar-brand"> {% if curr_date %}Today is: {{curr_date.strftime("%d %B %Y")}}{% endif %}</a>
+          <span class="navbar-text fs-5 me-3">
+            {% if curr_date %}
+                Today is: <span class="text-white">{{ curr_date.strftime("%d %B %Y") }}</span>
+            {% endif %}
+        </span>
           <form action="/reset" method="POST" style="display: inline;">
             <button type="submit" class="btn btn-danger">Reset</button>
           </form>

@@ -4,7 +4,7 @@
 
 {% block content %}
 <!-- Form with validation.-->
-<div class="container table-responsive-md">
+<div class="container table-responsive-sm">
 <h2 class="text-center mt-4">{{ 'Add' if is_add else 'Edit' }} Paddock</h2>
 <div class="d-flex justify-content-center align-items-top">
 <form class="row g-3 needs-validation" method="POST" action="{{ url_for('add_paddock') if is_add else url_for('update_paddock') }}" novalidate style="width: 400px;">
