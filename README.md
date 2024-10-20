@@ -31,9 +31,9 @@
   
   
 ## Image sources
-1. farm2.jpg: [unsplash](https://unsplash.com/photos/herd-of-dairy-cattles-on-field-AxoNnnH1Y98)
-     
-
+1. Ephraïm, L., _Herd of Dairy Cattles on Field_ [Picture]. Unsplash. https://unsplash.com/photos/herd-of-dairy-cattles-on-field-AxoNnnH1Y98
+   
+  
 ## Database questions
 1. What SQL statement creates the mobs table and defines its fields/columns? (Copy and paste the relevant lines of SQL.)
     ```SQL
