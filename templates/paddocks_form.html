@@ -15,9 +15,9 @@
     <div class="col-md-12">
         <label for="paddockName" class="form-label">Paddock Name</label>
         <input type="text" class="form-control" id="paddockName" name="paddock_name" value="{{ paddock['paddock_name'] if paddock else '' }}" required 
-                pattern="^[a-zA-Z0-9_]+$">
+                pattern="^[a-zA-Z0-9_ ]+$">
         <div class="invalid-feedback">
-            Only letters, numbers, and underscore are allowed.
+            Only letters, numbers, space and underscore are allowed.
         </div>
     </div>
     <div class="col-md-12">

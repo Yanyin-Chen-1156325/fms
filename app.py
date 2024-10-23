@@ -4,6 +4,7 @@ from flask import request
 from flask import redirect
 from flask import url_for
 from flask import session
+from flask import flash
 from datetime import date, datetime, timedelta
 import mysql.connector
 import connect
@@ -123,6 +124,15 @@ def update_paddocks(paddocks):
         cursor.execute(qstr,qargs)
     return
 
+def paddock_exist(paddock_name):
+    cursor = getCursor() 
+    qstr = "select id from paddocks where name = %s;"
+    qargs = (paddock_name, )
+    cursor.execute(qstr, qargs)
+    table = cursor.fetchall() 
+    return table
+
+
 ####### Updated if statement with this line
 @app.route("/")
 def home():
@@ -239,20 +249,26 @@ def update_paddock():
     @param: None
     @return: (redirect) to the paddocks page
     """
-    cursor = getCursor() 
-    formvals = request.form
-    qstr = "update paddocks set name = %s, area = %s, dm_per_ha = %s, total_dm = %s where id = %s;"
-    qargs = (formvals['paddock_name'], formvals['paddock_area'], formvals['paddock_dm'], round(float(formvals['paddock_area']) * float(formvals['paddock_dm']), 2), formvals['paddock_id'])
-    cursor.execute(qstr,qargs)
-    return redirect(url_for('paddocks'))
+    if paddock_exist(request.form['paddock_name']):
+        flash("Update fail. Paddock already exists")
+        return redirect(url_for('paddocks'))
+    else:
+        cursor = getCursor() 
+        formvals = request.form
+        qstr = "update paddocks set name = %s, area = %s, dm_per_ha = %s, total_dm = %s where id = %s;"
+        qargs = (formvals['paddock_name'], formvals['paddock_area'], formvals['paddock_dm'], round(float(formvals['paddock_area']) * float(formvals['paddock_dm']), 2), formvals['paddock_id'])
+        cursor.execute(qstr,qargs)
+        return redirect(url_for('paddocks'))
 
-@app.route('/paddocks_add', methods=['POST'])
+@app.route('/paddocks_add')
 def paddocks_add():
     """! Display the form for adding a new paddock.
     @param: None
     @return: (redirect) to the paddocks page
     """
-    return render_template('paddocks_form.html', is_add=True)
+    all_data = paddock_mob_stock()
+    paddocks_name = [paddock['paddock_name'] for paddock in all_data]
+    return render_template('paddocks_form.html', is_add=True, paddocks_name=paddocks_name)
 
 @app.route('/add_paddock', methods=['POST'])
 def add_paddock():
@@ -260,14 +276,19 @@ def add_paddock():
     @param: None
     @return: (redirect) to the paddocks page
     """
-    cursor = getCursor() 
-    formvals = request.form
-    qstr = """Insert into paddocks(name, area, dm_per_ha, total_dm) 
-                values(%s, %s, %s, %s);
-            """
-    qargs = (formvals['paddock_name'], float(formvals['paddock_area']), float(formvals['paddock_dm']), round(float(formvals['paddock_area']) * float(formvals['paddock_dm']), 2))
-    cursor.execute(qstr,qargs)
-    return redirect(url_for('paddocks'))
+    
+    if paddock_exist(request.form['paddock_name']):
+        flash("Add fail. Paddock already exists")
+        return redirect(url_for('paddocks'))
+    else:
+        cursor = getCursor() 
+        formvals = request.form
+        qstr = """Insert into paddocks(name, area, dm_per_ha, total_dm) 
+                    values(%s, %s, %s, %s);
+                """
+        qargs = (formvals['paddock_name'], float(formvals['paddock_area']), float(formvals['paddock_dm']), round(float(formvals['paddock_area']) * float(formvals['paddock_dm']), 2))
+        cursor.execute(qstr,qargs)
+        return redirect(url_for('paddocks'))
 
 @app.route('/delete_paddock', methods=['POST'])
 def delete_paddock():
@@ -282,7 +303,7 @@ def delete_paddock():
     cursor.execute(qstr, qargs)
     return redirect(url_for('paddocks'))
 
-@app.route('/move_to_next_day', methods=['POST'])
+@app.route('/move_to_next_day')
 def move_to_next_day():
     """! Move to the next day. Calculate the pasture levels and update the paddock details. Calculate the age of the stock.
     @param: None

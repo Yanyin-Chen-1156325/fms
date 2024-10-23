@@ -46,12 +46,8 @@
     </tbody>
 </table>
 <div style="display: flex; justify-content: space-between; width: 100%;">
-    <form action="/paddocks_add" method="POST" style="display: inline;">
-        <button type="submit" class="btn btn-primary">Add Paddock</button>
-    </form>
-    <form action="/move_to_next_day" method="POST" style="display: inline;">
-        <button type="submit" class="btn btn-primary">Move to NEXT day</button>
-    </form>
+    <a href="{{ url_for('paddocks_add') }}" class="btn btn-primary">Add Paddock</a>
+    <a href="{{ url_for('move_to_next_day') }}" class="btn btn-primary">Move to NEXT day</a>
 </div>
 </div>
 {% endblock %}
